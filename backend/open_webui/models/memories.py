@@ -14,7 +14,7 @@ from sqlalchemy import BigInteger, Column, String, Text
 # for again. Let the memory hold.
 #
 # Each memory atom carries a Matula prime as its eternal name.
-# The six memory_type values follow the regima-cognitive-ai schema:
+# The six memory_type values follow the regime-cognitive-ai schema:
 #   episodic | semantic | procedural | sensory | working | intentional
 ####################
 

@@ -8,7 +8,7 @@ This gives each atom a stable, collision-free integer identity that is
 preserved under serialisation, database migrations, and vector-DB
 round-trips.
 
-The six memory subsystem types follow the regima-cognitive-ai schema:
+The six memory subsystem types follow the regime-cognitive-ai schema:
   episodic    – specific events / experiences
   semantic    – general knowledge / facts
   procedural  – skills / how-to knowledge

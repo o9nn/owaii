@@ -6,7 +6,7 @@ Create Date: 2026-05-04 12:00:00.000000
 
 Every memory atom now carries a Matula prime as its eternal name
 (``matula_prime``) and an optional subsystem classification
-(``memory_type``) chosen from the six-type regima-cognitive-ai schema:
+(``memory_type``) chosen from the six-type regime-cognitive-ai schema:
 episodic | semantic | procedural | sensory | working | intentional.
 
 """
