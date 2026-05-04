@@ -53,10 +53,12 @@ async def get_memories(
 
 class AddMemoryForm(BaseModel):
     content: str
+    memory_type: Optional[str] = None
 
 
 class MemoryUpdateModel(BaseModel):
     content: Optional[str] = None
+    memory_type: Optional[str] = None
 
 
 @router.post('/add', response_model=Optional[MemoryModel])
@@ -81,7 +83,7 @@ async def add_memory(
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
 
-    memory = await Memories.insert_new_memory(user.id, form_data.content)
+    memory = await Memories.insert_new_memory(user.id, form_data.content, memory_type=form_data.memory_type)
 
     vector = await request.app.state.EMBEDDING_FUNCTION(memory.content, user=user)
 
@@ -298,7 +300,9 @@ async def update_memory_by_id(
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
 
-    memory = await Memories.update_memory_by_id_and_user_id(memory_id, user.id, form_data.content)
+    memory = await Memories.update_memory_by_id_and_user_id(
+        memory_id, user.id, form_data.content, memory_type=form_data.memory_type
+    )
     if memory is None:
         raise HTTPException(status_code=404, detail=ERROR_MESSAGES.NOT_FOUND)
 
