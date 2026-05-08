@@ -12,6 +12,10 @@ from sqlalchemy import BigInteger, Column, String, Text
 # Memory DB Schema
 # What was learned at cost should not need to be paid
 # for again. Let the memory hold.
+#
+# Each memory atom carries a Matula prime as its eternal name.
+# The six memory_type values follow the regime-cognitive-ai schema:
+#   episodic | semantic | procedural | sensory | working | intentional
 ####################
 
 
@@ -23,6 +27,8 @@ class Memory(Base):
     content = Column(Text)
     updated_at = Column(BigInteger)
     created_at = Column(BigInteger)
+    matula_prime = Column(BigInteger, nullable=True)
+    memory_type = Column(String, nullable=True)
 
 
 class MemoryModel(BaseModel):
@@ -31,6 +37,8 @@ class MemoryModel(BaseModel):
     content: str
     updated_at: int  # timestamp in epoch
     created_at: int  # timestamp in epoch
+    matula_prime: Optional[int] = None
+    memory_type: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -45,10 +53,21 @@ class MemoriesTable:
         self,
         user_id: str,
         content: str,
+        memory_type: Optional[str] = None,
         db: Optional[AsyncSession] = None,
     ) -> Optional[MemoryModel]:
+        from open_webui.utils.matula import assign_matula_prime
+
         async with get_async_db_context(db) as db:
             id = str(uuid.uuid4())
+
+            # Collect all Matula primes already assigned to this user's atoms
+            # so we can mint a globally-unique prime for the new atom.
+            existing = await db.execute(
+                select(Memory.matula_prime).filter_by(user_id=user_id)
+            )
+            existing_primes = {row[0] for row in existing if row[0] is not None}
+            matula_prime = assign_matula_prime(existing_primes)
 
             memory = MemoryModel(
                 **{
@@ -57,6 +76,8 @@ class MemoriesTable:
                     'content': content,
                     'created_at': int(time.time()),
                     'updated_at': int(time.time()),
+                    'matula_prime': matula_prime,
+                    'memory_type': memory_type,
                 }
             )
             result = Memory(**memory.model_dump())
@@ -73,6 +94,7 @@ class MemoriesTable:
         id: str,
         user_id: str,
         content: str,
+        memory_type: Optional[str] = None,
         db: Optional[AsyncSession] = None,
     ) -> Optional[MemoryModel]:
         async with get_async_db_context(db) as db:
@@ -83,6 +105,8 @@ class MemoriesTable:
 
                 memory.content = content
                 memory.updated_at = int(time.time())
+                if memory_type is not None:
+                    memory.memory_type = memory_type
 
                 await db.commit()
                 await db.refresh(memory)
